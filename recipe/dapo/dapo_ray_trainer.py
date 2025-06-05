@@ -163,7 +163,7 @@ class RayDAPOTrainer(RayPPOTrainer):
                             metrics.update(kl_metrics)  # TODO: This will be cleared if we use multiple genenration batches
                         else:
                             new_batch.batch["token_level_rewards"] = new_batch.batch["token_level_scores"]
-
+                    ### config.algorithm.filter_groups.enable=True 表示使用dynamic sampling
                     if not self.config.algorithm.filter_groups.enable:
                         batch = new_batch
                     else:  # NOTE: When prompts after filtering is less than train batch size,
@@ -184,6 +184,7 @@ class RayDAPOTrainer(RayPPOTrainer):
                         for prompt_uid, metric_vals in prompt_uid2metric_vals.items():
                             prompt_uid2metric_std[prompt_uid] = np.std(metric_vals)
 
+                        ### dynamic sampling 剔除掉优势值为0的prompt
                         kept_prompt_uids = [uid for uid, std in prompt_uid2metric_std.items() if std > 0 or len(prompt_uid2metric_vals[uid]) == 1]
                         num_prompt_in_batch += len(kept_prompt_uids)
 
